@@ -1,0 +1,8 @@
+.env
+node_modules/
+data/
+*.db
+.env.local
+
+# keep build artifacts out
+coverage/
