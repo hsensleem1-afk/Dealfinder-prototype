@@ -2,6 +2,12 @@ const { upsertProduct, upsertDeal, findProductByIds } = require('../models/model
 const { registry } = require('../registry');
 const crypto = require('crypto');
 
+function getUUID(){
+  if(typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  // fallback for older Node versions
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ crypto.randomBytes(1)[0] & 15 >> c / 4).toString(16));
+}
+
 function calcDiscount(originalPrice, price){
   if(!originalPrice || !price) return null;
   if(originalPrice <= 0) return null;
@@ -16,6 +22,7 @@ function calcTotalPrice(price, shippingCost){
 
 function scoreDeal(deal){
   // Simple deterministic scoring based on completeness and discount
+  // Score reasons can be derived by inspecting available fields
   let score = 0;
   if(deal.price!=null) score += 40;
   if(deal.originalPrice!=null) score += 20;
@@ -45,7 +52,7 @@ async function syncSource(sourceId){
     return result;
   }
 
-  const url = adapter.config.url;
+  const url = adapter.config && adapter.config.url;
   if(!url){
     result.status = 'NOT_CONFIGURED';
     result.finishedAt = new Date().toISOString();
@@ -54,16 +61,18 @@ async function syncSource(sourceId){
 
   try{
     const raw = await adapter.fetchProducts(url);
+    if(!Array.isArray(raw)) throw new Error('INVALID_FEED');
     for(const item of raw){
       try{
         const product = adapter.normalizeProduct(item);
+        if(!product) throw new Error('INVALID_PRODUCT');
         // deduplicate
         const existing = findProductByIds({gtin:product.gtin, ean:product.ean, upc:product.upc, mpn:product.mpn, brand:product.brand, title:product.title});
         let productId;
         if(existing){
           productId = existing.id;
         }else{
-          productId = crypto.randomUUID();
+          productId = getUUID();
         }
         product.id = productId;
         // calc
@@ -73,7 +82,7 @@ async function syncSource(sourceId){
         result.productsProcessed++;
         // deal
         const deal = {
-          dealId: crypto.createHash('sha1').update(sourceId + '|' + product.sourceProductId + '|' + (product.price||'')).digest('hex'),
+          dealId: crypto.createHash('sha1').update(sourceId + '|' + (product.sourceProductId||'') + '|' + (product.price||'')).digest('hex'),
           productId,
           source: product.source,
           merchant: product.merchant,
@@ -101,7 +110,7 @@ async function syncSource(sourceId){
         result.log += '\nItem error: ' + (e.message||String(e));
       }
     }
-    result.status = 'completed';
+    result.status = result.errors>0? 'partial' : 'completed';
   }catch(e){
     result.status = 'failed';
     result.log += '\nFetch error: ' + (e.message||String(e));
@@ -112,4 +121,4 @@ async function syncSource(sourceId){
   return result;
 }
 
-module.exports = { calcDiscount, calcTotalPrice, scoreDeal, syncSource };
+module.exports = { getUUID, calcDiscount, calcTotalPrice, scoreDeal, syncSource };

@@ -6,6 +6,13 @@ let db;
 
 function initDb(){
   const dbFile = process.env.DATABASE_FILE || './data/dealfinder.db';
+  // If using SQLite in-memory mode, do not attempt to create directories
+  if (dbFile === ':memory:' || dbFile.startsWith('file::memory')) {
+    db = new Database(dbFile);
+    createTables();
+    return;
+  }
+
   const dir = path.dirname(dbFile);
   if(!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive:true});
   db = new Database(dbFile);
