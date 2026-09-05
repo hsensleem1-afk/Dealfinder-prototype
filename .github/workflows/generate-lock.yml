@@ -24,7 +24,8 @@ jobs:
 
       - name: Generate package-lock.json
         run: |
-          npm install --package-lock-only
+          rm -f package-lock.json
+npm install --package-lock-only
 
       - name: Verify lockfile has no PLACEHOLDER
         run: |
