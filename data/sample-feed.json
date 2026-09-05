@@ -1,0 +1,40 @@
+[
+  {
+    "id": "sample-1",
+    "merchant": "Test Store",
+    "title": "Test Widget Pro",
+    "description": "A test widget used for integration tests",
+    "brand": "TestBrand",
+    "category": "Electronics",
+    "image": "https://via.placeholder.com/300x200?text=Test+Widget",
+    "url": "https://example.com/product/test-widget-pro",
+    "price": "49.99",
+    "original_price": "79.99",
+    "currency": "USD",
+    "availability": "in_stock",
+    "gtin": "0001234560001",
+    "mpn": "TW-1000",
+    "sku": "TW1000",
+    "shipping_cost": "4.99",
+    "updated_at": "2026-01-01T00:00:00Z"
+  },
+  {
+    "id": "sample-2",
+    "merchant": "Test Store",
+    "title": "Another Test Gadget",
+    "description": "Another test product",
+    "brand": "TestBrand",
+    "category": "Gadgets",
+    "image": "https://via.placeholder.com/300x200?text=Test+Gadget",
+    "url": "https://example.com/product/test-gadget",
+    "price": "29.99",
+    "original_price": "49.99",
+    "currency": "USD",
+    "availability": "in_stock",
+    "gtin": "0001234560002",
+    "mpn": "TG-2000",
+    "sku": "TG2000",
+    "shipping_cost": "0",
+    "updated_at": "2026-01-02T00:00:00Z"
+  }
+]
